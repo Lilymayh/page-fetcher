@@ -1,15 +1,22 @@
-const { url } = require('inspector');
-const request = require('./request');
-const fs = require('fs');
-
 const writeToFile = (url, filename) => {
-	request.getrequest(url, (error, response, body) => {
-		console.log("error: ", error);
-		console.log("response: ", response && response.statusCode);
-		console.log("body: ", body);
-	})
+	request(url, (error, response, body) => {
+		if (error) {
+			console.error('Error:', error);
+			return;
+		}
+		if (response.statusCode !== 200) {
+			console.error('Failed to fetch URL:', response && response.statusCode);
+			return;
+		}
 
-	fs.WriteFile(filename, (body) => {
-		console.log(`Downloaded and saved ${body.length} bytes to ${filename}`);
-	})
+		fs.writeFile(filename, body, (err) => {
+			if (err) {
+				console.error('Error writing to file:', err);
+				return;
+			}
+			console.log(`Downloaded and saved ${body.length} bytes to ${filename}`);
+		});
+	});
 };
+
+module.exports = writeToFile;
